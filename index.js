@@ -24,7 +24,7 @@ const { startWithdrawConfirmCron } = require('./cron/withdrawConfirmCron');
 const app = express();
 
 app.use(cors({
-  origin: 'https://hatestake.vercel.app',
+  origin: 'https://hate-upgrade.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

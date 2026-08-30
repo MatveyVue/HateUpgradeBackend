@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: scmd69-staking
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_PATH
+        value: /var/data/staking.db
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: staking-data
+      mountPath: /var/data
+      sizeGB: 1

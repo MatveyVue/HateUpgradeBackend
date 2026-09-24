@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { initSchema } = require('./database/schema');
+const { autoStartSeason } = require('./services/seasonService');
 const { ok } = require('./utils/response');
 const { apiLimiter, sensitiveLimiter } = require('./middleware/rateLimit');
 const authRoutes = require('./routes/auth');
@@ -23,8 +24,20 @@ const { startWithdrawConfirmCron } = require('./cron/withdrawConfirmCron');
 
 const app = express();
 
+const ALLOWED_ORIGINS = [
+  'https://hatestake.vercel.app',
+  'https://hate-upgrade.vercel.app',
+  'https://hate-caps-v2.vercel.app',
+  'http://localhost:5173'
+];
+
 app.use(cors({
-  origin: 'https://hate-caps-v2.vercel.app',
+  origin(origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -50,6 +63,8 @@ app.get('/health', (req, res) => {
 
 async function start() {
   await initSchema();
+
+  await autoStartSeason();
 
   const port = Number(process.env.PORT || 3000);
 

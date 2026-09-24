@@ -377,6 +377,39 @@ router.post('/resume-season', adminAuth, async (req, res) => {
 
 
 
+router.post('/end-season', adminAuth, async (req, res) => {
+  try {
+    const season = await get(
+      `SELECT * FROM staking_seasons
+       WHERE status IN ('active', 'paused')
+       ORDER BY id DESC
+       LIMIT 1`
+    );
+
+    if (!season) {
+      return fail(res, 'NO_ACTIVE_SEASON', 'No active season to end');
+    }
+
+    await run(
+      `UPDATE staking_seasons
+       SET status = 'ended',
+           end_at = ?
+       WHERE id = ?`,
+      [Date.now(), season.id]
+    );
+
+    const updated = await get(
+      `SELECT * FROM staking_seasons WHERE id = ?`,
+      [season.id]
+    );
+
+    return ok(res, { season: updated });
+  } catch (err) {
+    console.error('END SEASON ERROR:', err);
+    return fail(res, 'END_SEASON_ERROR', 'Failed to end season', 500);
+  }
+});
+
 router.get('/stats', adminAuth, async (req, res) => {
   try {
     const users = await get(`SELECT COUNT(*) AS count FROM users`);
